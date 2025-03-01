@@ -23,10 +23,8 @@ def listen_for_messages():
         try:
             data, addr = listen_sock.recvfrom(1024)
             message = data.decode()
-            print(f"Received from {addr}: {message}")
+            print(f"Received from {addr}:{STM32_PORT}: {message}")
             
-            # Optional: Echo back the data
-            # listen_sock.sendto(data, addr)
         except Exception as e:
             if running:  # Only show error if we're still supposed to be running
                 print(f"Error receiving: {e}")
@@ -54,7 +52,6 @@ try:
 except KeyboardInterrupt:
     print("\nExiting...")
 finally:
-    # Clean up
     running = False
     send_sock.close()
     listen_sock.close()
