@@ -16,7 +16,7 @@ STM32_PORT = 6000            # Port the STM32 is listening on
 # Audio file settings
 AUDIO_FILE = "recorded_audio.wav"
 CHANNELS = 1                 # Mono
-SAMPLE_WIDTH = 4             # 32-bit audio (4 bytes)
+SAMPLE_WIDTH = 2             # 32-bit audio (4 bytes)
 SAMPLE_RATE = 32000          # 32 kHz (match your I2S configuration)
 
 # Create sockets
