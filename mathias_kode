@@ -1,0 +1,60 @@
+import pandas as pd
+import numpy as np
+import soundfile as sf
+import sounddevice as sd
+import matplotlib.pyplot as plt
+
+# Define which frequency data is sampled at
+frequency = 48000
+
+
+# End of input constants -----------------------------------------
+
+# Load the CSV data
+df = pd.read_csv("1_second_beep.csv")  # Replace with your actual filename
+
+# Convert hex values to signed integers
+def hex_to_signed_int(hex_value):
+    """ Convert 16-bit hex value to signed integer (Two’s Complement) """
+    value = int(hex_value, 16)
+    if value & (1 << 15):  # If the MSB is set (negative number in 2's complement)
+        value -= (1 << 16)
+    return value
+
+# Apply conversion to the 'Value' column
+df['SignedValue'] = df['Value'].apply(hex_to_signed_int)
+
+# Extract data for both channels
+left_channel_data = df[df['Channel'] == 2]['SignedValue'].values
+right_channel_data = df[df['Channel'] == 1]['SignedValue'].values
+
+# Normalize to a range between -1 and 1 for audio playback
+left_channel_normalized = left_channel_data / (2**15)
+right_channel_normalized = right_channel_data / (2**15)
+
+# Save the audio data to a .wav file (stereo with left and right channels)
+stereo_audio = np.stack((left_channel_normalized, left_channel_normalized), axis=-1)
+sf.write('output_mono.wav', stereo_audio, frequency)  # 32kHz sample rate
+
+# Play the sound
+sd.play(stereo_audio, frequency)  # Play at 32kHz
+sd.wait()  # Wait for the sound to finish before proceeding
+
+# Plot both channels
+plt.figure(figsize=(10, 6))
+
+# Plot the left channel
+plt.plot(df[df['Channel'] == 1]['Time [s]'], left_channel_normalized, label='Left Channel', color='blue')
+
+# Plot the right channel
+plt.plot(df[df['Channel'] == 2]['Time [s]'], right_channel_normalized, label='Right Channel', color='red')
+
+# Add titles and labels
+plt.title('Stereo Audio Signals (Left and Right Channels)')
+plt.xlabel('Time [s]')
+plt.ylabel('Amplitude')
+plt.grid(True)
+plt.legend(loc='upper right')
+
+# Show the plot
+plt.show()
