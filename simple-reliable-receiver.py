@@ -8,7 +8,7 @@ import threading
 import queue
 import sys
 
-
+#code for testing
 #simple audio streaming
 def receive_and_play(listen_port=6001, stm32_ip="192.168.1.111", 
                      sample_rate=32018, buffer_size=4048,
