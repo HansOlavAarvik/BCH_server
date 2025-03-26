@@ -1,11 +1,11 @@
 import socket
 
-def receive_udp_data(ip_address="0.0.0.0", port=6001):
+def receive_udp_data(ip_address="0.0.0.0", port=6002):
     """
     Receive UDP data from a specific IP address on the given port.
     
     Parameters:
-    - ip_address: The IP address to listen on (default "0.0.0.0" means all available interfaces)
+    - ip_address: The IP address to listen on (default "0.0.0.0" means all available interfaces)ø
     - port: The port to listen on (default 5005)
     """
     # Create a UDP socket
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     # You can specify the STM32's IP address if you want to receive only from that device
     # otherwise it will accept packets from any address
     stm32_ip = "192.168.1.111"  # Replace with your STM32's static IP
-    listen_port = 6001  # Replace with the port your STM32 is sending to
+    listen_port = 6002  # Replace with the port your STM32 is sending to
     
     # To listen only for the specific STM32 device, use its IP:
     # receive_udp_data(stm32_ip, listen_port)
