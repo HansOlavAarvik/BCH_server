@@ -122,79 +122,48 @@ def create_dashboard(storage):
         temp_fig = go.Figure()
         humid_fig = go.Figure()
         
-        # If we have data, create some example graphs
+        # If we have data, create real-time graphs
         if latest_data:
-            # For each device, show temperature
+            # For each device, show temperature and humidity
             for device_id, data in latest_data.items():
-                # For this prototype, just create some demo data if no actual temp/humidity
-                if "temperature" not in data:
-                    # Synthetic data for visualization testing
-                    times = [datetime.now() - timedelta(seconds=i*5) for i in range(20)]
-                    temps_inside = [25 + np.sin(i/10) + np.random.randn()*0.5 for i in range(20)]
-                    temps_outside = [20 + np.sin(i/8) + np.random.randn()*1.0 for i in range(20)]
+                # Get device history for the past 10 minutes
+                history = storage.get_sensor_history(device_id, limit=600)  # Get up to 10 minutes of data
+                
+                # Extract timestamps, temperatures and humidity from history
+                timestamps = []
+                inside_temps = []
+                outside_temps = []
+                inside_humids = []
+                outside_humids = []
+                
+                for entry in history:
+                    # Try to parse timestamp
+                    try:
+                        timestamp = datetime.fromisoformat(entry.get("timestamp", datetime.now().isoformat()))
+                        timestamps.append(timestamp)
+                    except (ValueError, TypeError):
+                        timestamps.append(datetime.now())
                     
-                    temp_fig.add_trace(go.Scatter(
-                        x=times, y=temps_inside, mode='lines+markers',
-                        name=f"{device_id} (Inside)"
-                    ))
+                    # Get temperature values
+                    temps = entry.get("temperature", {})
+                    inside_temps.append(temps.get("inside", 0))
+                    outside_temps.append(temps.get("outside", 0))
                     
-                    temp_fig.add_trace(go.Scatter(
-                        x=times, y=temps_outside, mode='lines+markers',
-                        name=f"{device_id} (Outside)" 
-                    ))
+                    # Get humidity values
+                    humids = entry.get("humidity", {})
+                    inside_humids.append(humids.get("inside", 0))
+                    outside_humids.append(humids.get("outside", 0))
+                
+                # If no history, at least show current point
+                if not timestamps:
+                    timestamps = [datetime.now()]
+                    temps = data.get("temperature", {})
+                    inside_temps = [temps.get("inside", 0)]
+                    outside_temps = [temps.get("outside", 0)]
                     
-                    # Humidity
-                    humid_inside = [40 + np.sin(i/15)*10 + np.random.randn()*2 for i in range(20)]
-                    humid_outside = [60 + np.cos(i/12)*15 + np.random.randn()*3 for i in range(20)]
-                    
-                    humid_fig.add_trace(go.Scatter(
-                        x=times, y=humid_inside, mode='lines+markers',
-                        name=f"{device_id} (Inside)"
-                    ))
-                    
-                    humid_fig.add_trace(go.Scatter(
-                        x=times, y=humid_outside, mode='lines+markers',
-                        name=f"{device_id} (Outside)"
-                    ))
-                else:
-                    # Get device history for the past 10 minutes
-                    history = storage.get_sensor_history(device_id, limit=600)  # Get up to 10 minutes of data
-                    
-                    # Extract timestamps, temperatures and humidity from history
-                    timestamps = []
-                    inside_temps = []
-                    outside_temps = []
-                    inside_humids = []
-                    outside_humids = []
-                    
-                    for entry in history:
-                        # Try to parse timestamp
-                        try:
-                            timestamp = datetime.fromisoformat(entry.get("timestamp", datetime.now().isoformat()))
-                            timestamps.append(timestamp)
-                        except (ValueError, TypeError):
-                            timestamps.append(datetime.now())
-                        
-                        # Get temperature values
-                        temps = entry.get("temperature", {})
-                        inside_temps.append(temps.get("inside", 0))
-                        outside_temps.append(temps.get("outside", 0))
-                        
-                        # Get humidity values
-                        humids = entry.get("humidity", {})
-                        inside_humids.append(humids.get("inside", 0))
-                        outside_humids.append(humids.get("outside", 0))
-                    
-                    # If no history, at least show current point
-                    if not timestamps:
-                        timestamps = [datetime.now()]
-                        temps = data.get("temperature", {})
-                        inside_temps = [temps.get("inside", 0)]
-                        outside_temps = [temps.get("outside", 0)]
-                        
-                        humid = data.get("humidity", {})
-                        inside_humids = [humid.get("inside", 0)]
-                        outside_humids = [humid.get("outside", 0)]
+                    humid = data.get("humidity", {})
+                    inside_humids = [humid.get("inside", 0)]
+                    outside_humids = [humid.get("outside", 0)]
                     
                     # Add traces with lines connecting the points
                     temp_fig.add_trace(go.Scatter(

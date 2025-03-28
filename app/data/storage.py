@@ -93,17 +93,6 @@ class MemoryStorage:
         """
         Get the latest sensor data for all devices.
         """
-        # For testing, if no data has been received, create a dummy entry
-        if not self.latest_data:
-            dummy_data = {
-                "device_id": "dummy_device",
-                "temperature": {"inside": 25.5, "outside": 18.2},
-                "humidity": {"inside": 45.0, "outside": 65.0},
-                "timestamp": datetime.now().isoformat()
-            }
-            self.add_sensor_data(dummy_data)
-            logger.info(f"Added dummy data for testing: {dummy_data}")
-            
         logger.info(f"Returning latest data: {self.latest_data}")
         return self.latest_data
     
