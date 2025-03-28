@@ -10,7 +10,7 @@ import sys
 
 #code for testing
 #simple audio streaming
-def receive_and_play(listen_port=6001, stm32_ip="192.168.1.111", 
+def receive_and_play(listen_port=3391, stm32_ip="192.168.1.111", 
                      sample_rate=32018, buffer_size=4048,
                      jitter_buffer_ms=100, use_big_endian=True):
     """
@@ -203,7 +203,7 @@ def receive_and_play(listen_port=6001, stm32_ip="192.168.1.111",
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Simple Reliable Audio Player')
-    parser.add_argument('--port', type=int, default=6001, help='UDP listen port')
+    parser.add_argument('--port', type=int, default=3391, help='UDP listen port')
     parser.add_argument('--stm32', type=str, default='192.168.1.111', help='STM32 IP address')
     parser.add_argument('--rate', type=int, default=32018, help='Audio sample rate (Hz)')
     parser.add_argument('--buffer', type=int, default=1024, help='Audio buffer size (samples)')

@@ -56,30 +56,70 @@ class UDPListener:
         This method tries to determine if the data is JSON or raw binary data
         and routes it to the appropriate callback.
         """
+        logger.info(f"Received data from {addr}, {len(data)} bytes")
+        
         try:
             # First try to parse as JSON
-            json_data = json.loads(data.decode('utf-8'))
-            logger.debug(f"Received JSON data from {addr}: {json_data}")
+            try:
+                decoded = data.decode('utf-8')
+                logger.info(f"Decoded data: {decoded[:100]}...")
+                json_data = json.loads(decoded)
+                logger.info(f"Received JSON data from {addr}: {json_data}")
+                
+                # Transform the STM32 sensor data format to our internal format
+                if "Inside_temperature" in json_data:
+                    # This is the STM32 sensor data format
+                    processed_data = {
+                        "device_id": f"device_{addr[0]}",
+                        "temperature": {
+                            "inside": json_data.get("Inside_temperature", 0),
+                            "outside": json_data.get("Outside_temperature", 0)
+                        },
+                        "humidity": {
+                            "inside": json_data.get("Inside_humidity", 0),
+                            "outside": json_data.get("outisde_humidity", 0)  # Note the typo in the key
+                        },
+                        "tof": {
+                            "distance": json_data.get("Time_of_flight", 0),
+                            "door_closed": json_data.get("Time_of_flight", 0) < -450  # Example door threshold
+                        }
+                    }
+                    logger.info(f"Processed STM32 sensor data: {processed_data}")
+                    
+                    if self.json_callback:
+                        self.json_callback(processed_data, addr)
+                    else:
+                        logger.warning("No JSON callback registered")
+                else:
+                    # This is some other JSON format, pass it through as-is
+                    if self.json_callback:
+                        self.json_callback(json_data, addr)
+                    else:
+                        logger.warning("No JSON callback registered")
+                
+            except json.JSONDecodeError as je:
+                logger.info(f"Not valid JSON: {je}")
+                # Not JSON, so it's probably raw binary data
+                # Determine if it's audio or vibration based on packet size or headers
+                # This is simplistic and would need to be adjusted based on actual data format
+                
+                if len(data) > 1000:  # Arbitrary distinction for demonstration
+                    logger.info(f"Received audio data from {addr}: {len(data)} bytes")
+                    if self.audio_callback:
+                        self.audio_callback(data, addr)
+                    else:
+                        logger.warning("No audio callback registered")
+                else:
+                    logger.info(f"Received vibration data from {addr}: {len(data)} bytes")
+                    if self.vibration_callback:
+                        self.vibration_callback(data, addr)
+                    else:
+                        logger.warning("No vibration callback registered")
             
-            if self.json_callback:
-                self.json_callback(json_data, addr)
-            
-        except json.JSONDecodeError:
-            # Not JSON, so it's probably raw binary data
-            # Determine if it's audio or vibration based on packet size or headers
-            # This is simplistic and would need to be adjusted based on actual data format
-            
-            if len(data) > 1000:  # Arbitrary distinction for demonstration
-                logger.debug(f"Received audio data from {addr}: {len(data)} bytes")
-                if self.audio_callback:
-                    self.audio_callback(data, addr)
-            else:
-                logger.debug(f"Received vibration data from {addr}: {len(data)} bytes")
-                if self.vibration_callback:
-                    self.vibration_callback(data, addr)
-        
         except Exception as e:
             logger.error(f"Error processing data from {addr}: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
 
 
 class UDPProtocol(asyncio.DatagramProtocol):

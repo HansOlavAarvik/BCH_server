@@ -1,9 +1,10 @@
 # BCH_Server Development Guidelines
 
 ## Run Commands
-- Run UDP message receiver: `python Hello_from_stm.py`
+- Run the main server (includes UDP receiver): `python -m app.main`
+- Run standalone UDP message receiver (for testing): `python Hello_from_stm.py`
 - Run audio streaming: `python simple-reliable-receiver.py`
-- Run with custom port: `python simple-reliable-receiver.py --port 6001`
+- Run with custom port: `python simple-reliable-receiver.py --port 3391`
 - Run with specified device: `python simple-reliable-receiver.py --stm32 192.168.1.111`
 
 ## Code Style Guidelines
