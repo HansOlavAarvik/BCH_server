@@ -9,12 +9,15 @@ packages = [{include = "app"}]
 [tool.poetry.dependencies]
 python = "^3.12.3"
 dash = "^2.16.0"
+dash-bootstrap-components = "^1.5.0"
 fastapi = "^0.111.0"
 pandas = "^2.2.0"
 numpy = "^1.26.4"
 uvicorn = "^0.29.0"
 plotly = "^5.23.0"
 scipy = "^1.13.0"  # For frequency analysis
+pyfiglet = "^1.0.2"
+# pyaudio = "^0.2.14"  # For audio playback - requires system dependencies
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.0"
